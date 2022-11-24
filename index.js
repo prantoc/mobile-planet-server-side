@@ -41,6 +41,7 @@ async function run() {
     try {
         const DB = client.db("mobilePlanet");
         const categoryCollection = DB.collection("categories");
+        const usersCollection = DB.collection("user")
 
         //# JWT Access Token Create
         app.get('/jwt', async (req, res) => {
@@ -55,6 +56,13 @@ async function run() {
 
         })
 
+        //# Users
+        //* User create api
+        app.post('/users', async (req, res) => {
+            const user = req.body
+            const result = await usersCollection.insertOne(user);
+            res.send(result)
+        })
 
 
     } finally {
