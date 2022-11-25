@@ -86,6 +86,16 @@ async function run() {
             res.send({ isAdmin: user?.role === 'admin' })
         })
 
+
+        //# Category
+        //* Add category api
+        app.post('/add-category', verifyJWT, verifyAdmin, async (req, res) => {
+            const data = req.body
+            const result = await categoryCollection.insertOne(data)
+            res.send(result)
+        })
+
+
     } finally {
     }
 }
