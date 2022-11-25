@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 var cors = require('cors')
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 
 //#port setup
@@ -98,6 +98,14 @@ async function run() {
         //* Get category api
         app.get('/category', async (req, res) => {
             const result = await categoryCollection.find({}).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
+
+        //* Delete category api
+        app.delete('/category/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await categoryCollection.deleteOne(query);
             res.send(result)
         })
     } finally {
