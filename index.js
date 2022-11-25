@@ -58,7 +58,7 @@ async function run() {
 
 
         //# Users
-        //* User role check
+        //* User role check 
         //! after verify jwtVerify it will be ran 
         const verifyAdmin = async (req, res, next) => {
             const decodedEmail = req.decoded.email
@@ -72,18 +72,26 @@ async function run() {
         }
 
 
+
         //* User create api
         app.post('/users', async (req, res) => {
             const user = req.body
             const result = await usersCollection.insertOne(user);
             res.send(result)
         })
-        //* User role check api
+        //* Admin role check api
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const user = await usersCollection.findOne(query)
             res.send({ isAdmin: user?.role === 'admin' })
+        })
+        //* Admin seller check api
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            res.send({ isSeller: user?.role === 'seller' })
         })
 
 
