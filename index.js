@@ -95,7 +95,11 @@ async function run() {
             res.send(result)
         })
 
-
+        //* Get category api
+        app.get('/category', async (req, res) => {
+            const result = await categoryCollection.find({}).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
     } finally {
     }
 }
