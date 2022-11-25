@@ -104,7 +104,7 @@ async function run() {
             res.send(result)
         })
 
-        //* Get category api
+        //* Get categories api
         app.get('/category', async (req, res) => {
             const result = await categoryCollection.find({}).sort({ _id: -1 }).toArray();
             res.send(result)
@@ -132,6 +132,18 @@ async function run() {
             res.send(result)
         })
 
+        //* Get products api
+        app.get('/product', async (req, res) => {
+            const result = await productsCollection.find({}).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
+        //* Delete product api
+        app.delete('/product/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await productsCollection.deleteOne(query);
+            res.send(result)
+        })
 
 
     } finally {
