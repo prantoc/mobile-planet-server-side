@@ -56,14 +56,35 @@ async function run() {
 
         })
 
+
         //# Users
+        //* User role check
+        //! after verify jwtVerify it will be ran 
+        const verifyAdmin = async (req, res, next) => {
+            const decodedEmail = req.decoded.email
+            const id = req.params.id
+            const query = { email: decodedEmail }
+            const isAdmin = await usersCollection.findOne(query)
+            if (isAdmin.role !== 'admin') {
+                return res.status(403).send({ message: 'Forbidden Access!' })
+            }
+            next()
+        }
+
+
         //* User create api
         app.post('/users', async (req, res) => {
             const user = req.body
             const result = await usersCollection.insertOne(user);
             res.send(result)
         })
-
+        //* User role check api
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            res.send({ isAdmin: user?.role === 'admin' })
+        })
 
     } finally {
     }
