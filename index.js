@@ -118,7 +118,11 @@ async function run() {
             res.send(result)
         })
 
-
+        //* Get category name only
+        app.get('/category-name', async (req, res) => {
+            const result = await categoryCollection.find({}).project({ categoryName: 1 }).toArray()
+            res.send(result)
+        })
 
         //# Product
         //* Add product api
