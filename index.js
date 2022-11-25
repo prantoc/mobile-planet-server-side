@@ -111,7 +111,7 @@ async function run() {
         })
 
         //* Delete category api
-        app.delete('/category/:id', async (req, res) => {
+        app.delete('/category/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await categoryCollection.deleteOne(query);
