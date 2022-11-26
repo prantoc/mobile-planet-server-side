@@ -79,6 +79,12 @@ async function run() {
             const user = await usersCollection.findOne(query)
             res.send(user)
         })
+
+        //* get api for all users
+        app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
+            const user = await usersCollection.find({}).sort({ _id: -1 }).toArray();
+            res.send(user)
+        })
         //* Admin role check api
         app.get('/users/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
@@ -86,7 +92,7 @@ async function run() {
             const user = await usersCollection.findOne(query)
             res.send({ isAdmin: user?.role === 'admin' })
         })
-        //* Admin seller check api
+        //*  Seller role check api
         app.get('/users/seller/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
