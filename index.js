@@ -43,6 +43,7 @@ async function run() {
         const categoryCollection = DB.collection("categories");
         const usersCollection = DB.collection("user")
         const productsCollection = DB.collection("products")
+        const bookingProductCollection = DB.collection("bookingProduct")
 
         //# JWT Access Token Create
         app.get('/jwt', async (req, res) => {
@@ -225,6 +226,14 @@ async function run() {
             // const category = await categoryCollection.findOne(query);
             const filter = { _id: ObjectId(id), displayListing: true }
             const result = await productsCollection.findOne(filter);
+            res.send(result)
+        })
+
+        //? Buyer  data frontned
+        //* book product api
+        app.post('/book-product', verifyJWT, async (req, res) => {
+            const data = req.body
+            const result = await bookingProductCollection.insertOne(data)
             res.send(result)
         })
 
