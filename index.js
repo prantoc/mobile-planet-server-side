@@ -145,6 +145,17 @@ async function run() {
             res.send(result)
         })
 
+        //? Product data frontned
+        //* Get products by category id api
+        app.get('/category/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const category = await categoryCollection.findOne(query);
+            const filter = { productCategory: category.categoryName }
+            const result = await productsCollection.find(filter).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
+
 
     } finally {
     }
