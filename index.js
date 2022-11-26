@@ -80,7 +80,7 @@ async function run() {
             res.send(result)
         })
         //* Specific user data get api
-        app.get('/user/:email', async (req, res) => {
+        app.get('/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const user = await usersCollection.findOne(query)
@@ -144,7 +144,7 @@ async function run() {
             res.send(result)
         })
         //* Approve product for listing api
-        app.put('/pro/:id', verifyJWT, verifyAdmin, async (req, res) => {
+        app.put('/product/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const product = await productsCollection.findOne(query);
