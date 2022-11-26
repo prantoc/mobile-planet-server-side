@@ -192,6 +192,22 @@ async function run() {
             const result = await productsCollection.updateOne(query, updateDoc);
             res.send(result)
         })
+        //* seller sent request for product advertise api
+        app.get('/productAdvertise/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const product = await productsCollection.findOne(query);
+            const value = product.advertise === 'pending' ? false : true;
+            const updateDoc = {
+                $set: {
+                    advertise: value
+                },
+            };
+            const result = await productsCollection.updateOne(query, updateDoc);
+            res.send(result)
+        })
+
+
         //* Delete product api
         app.delete('/product/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
