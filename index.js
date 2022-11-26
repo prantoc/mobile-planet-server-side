@@ -82,7 +82,9 @@ async function run() {
 
         //* get api for all users
         app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
-            const user = await usersCollection.find({}).sort({ _id: -1 }).toArray();
+            const email = req.query.email;
+            const query = { email: { $nin: [email] } }  //! get all users data except admin data
+            const user = await usersCollection.find(query).sort({ _id: -1 }).toArray();
             res.send(user)
         })
         //* Admin role check api
