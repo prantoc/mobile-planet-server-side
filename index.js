@@ -94,14 +94,22 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const user = await usersCollection.findOne(query);
+            const filter = { sellerEmail: user.email }
             const updateDoc = {
                 $set: {
                     verified: !user.verified
                 },
             };
+            const updateProduct = {
+                $set: {
+                    verifiedSeller: !user.verified
+                },
+            };
+            await productsCollection.updateMany(filter, updateProduct);
             const result = await usersCollection.updateOne(query, updateDoc);
             res.send(result)
         })
+
         //* Delete users api
         app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
