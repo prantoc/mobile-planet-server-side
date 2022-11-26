@@ -137,6 +137,18 @@ async function run() {
             const result = await productsCollection.find({}).sort({ _id: -1 }).toArray();
             res.send(result)
         })
+        //* Approve product for listing api
+        app.put('/pro/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    displayListing: true
+                },
+            };
+            const result = await productsCollection.updateOne(query, updateDoc);
+            res.send(result)
+        })
         //* Delete product api
         app.delete('/product/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
@@ -151,7 +163,7 @@ async function run() {
             const id = req.params.id
             const query = { _id: ObjectId(id) }
             const category = await categoryCollection.findOne(query);
-            const filter = { productCategory: category.categoryName }
+            const filter = { productCategory: category.categoryName, displayListing: true }
             const result = await productsCollection.find(filter).sort({ _id: -1 }).toArray();
             res.send(result)
         })
