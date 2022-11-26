@@ -72,13 +72,6 @@ async function run() {
             next()
         }
 
-
-        //* User create api
-        app.post('/users', async (req, res) => {
-            const user = req.body
-            const result = await usersCollection.insertOne(user);
-            res.send(result)
-        })
         //* Specific user data get api
         app.get('/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
@@ -87,14 +80,14 @@ async function run() {
             res.send(user)
         })
         //* Admin role check api
-        app.get('/users/admin/:email', async (req, res) => {
+        app.get('/users/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const user = await usersCollection.findOne(query)
             res.send({ isAdmin: user?.role === 'admin' })
         })
         //* Admin seller check api
-        app.get('/users/seller/:email', async (req, res) => {
+        app.get('/users/seller/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const user = await usersCollection.findOne(query)
@@ -110,14 +103,8 @@ async function run() {
             res.send(result)
         })
 
-        //* Get categories api
-        app.get('/category', async (req, res) => {
-            const result = await categoryCollection.find({}).sort({ _id: -1 }).toArray();
-            res.send(result)
-        })
-
         //* Delete category api
-        app.delete('/category/:id', verifyJWT, async (req, res) => {
+        app.delete('/category/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await categoryCollection.deleteOne(query);
@@ -125,7 +112,7 @@ async function run() {
         })
 
         //* Get category name only
-        app.get('/category-name', async (req, res) => {
+        app.get('/category-name', verifyJWT, async (req, res) => {
             const result = await categoryCollection.find({}).project({ categoryName: 1 }).toArray()
             res.send(result)
         })
@@ -139,8 +126,17 @@ async function run() {
         })
 
         //* Get products api
-        app.get('/product', async (req, res) => {
-            const result = await productsCollection.find({}).sort({ _id: -1 }).toArray();
+        app.get('/product/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            let result = '';
+            if (user.role === 'admin') {
+                result = await productsCollection.find({}).sort({ _id: -1 }).toArray();
+            } else {
+                const filter = { sellerEmail: email }
+                result = await productsCollection.find(filter).sort({ _id: -1 }).toArray();
+            }
             res.send(result)
         })
         //* Approve product for listing api
@@ -161,6 +157,22 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await productsCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        //! Common Apis----------------------------------------------
+        //? category api
+        //* Get categories api
+        app.get('/category', async (req, res) => {
+            const result = await categoryCollection.find({}).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
+        //! Frontend Apis----------------------------------------------
+        //? User data store from frontned
+        //* User create api
+        app.post('/users', async (req, res) => {
+            const user = req.body
+            const result = await usersCollection.insertOne(user);
             res.send(result)
         })
 
