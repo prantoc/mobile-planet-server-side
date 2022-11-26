@@ -192,7 +192,7 @@ async function run() {
             const result = await productsCollection.updateOne(query, updateDoc);
             res.send(result)
         })
-        //* seller sent request for product advertise api
+        //* Product advertise api
         app.get('/productAdvertise/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
@@ -206,7 +206,6 @@ async function run() {
             const result = await productsCollection.updateOne(query, updateDoc);
             res.send(result)
         })
-
 
         //* Delete product api
         app.delete('/product/:id', verifyJWT, async (req, res) => {
