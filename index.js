@@ -87,6 +87,29 @@ async function run() {
             const user = await usersCollection.find(query).sort({ _id: -1 }).toArray();
             res.send(user)
         })
+
+        //* Verified user api
+        app.put('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const user = await usersCollection.findOne(query);
+            const updateDoc = {
+                $set: {
+                    verified: !user.verified
+                },
+            };
+            const result = await usersCollection.updateOne(query, updateDoc);
+            res.send(result)
+        })
+        //* Delete users api
+        app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await usersCollection.deleteOne(query);
+            res.send(result)
+        })
+
+
         //* Admin role check api
         app.get('/users/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
