@@ -73,12 +73,18 @@ async function run() {
         }
 
 
-
         //* User create api
         app.post('/users', async (req, res) => {
             const user = req.body
             const result = await usersCollection.insertOne(user);
             res.send(result)
+        })
+        //* Specific user data get api
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            res.send(user)
         })
         //* Admin role check api
         app.get('/users/admin/:email', async (req, res) => {
@@ -141,9 +147,10 @@ async function run() {
         app.put('/pro/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
+            const product = await productsCollection.findOne(query);
             const updateDoc = {
                 $set: {
-                    displayListing: true
+                    displayListing: !product.displayListing
                 },
             };
             const result = await productsCollection.updateOne(query, updateDoc);
