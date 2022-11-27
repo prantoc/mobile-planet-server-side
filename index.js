@@ -133,7 +133,13 @@ async function run() {
             const user = await usersCollection.findOne(query)
             res.send({ isSeller: user?.role === 'seller' })
         })
-
+        //* Get seller all buyers
+        app.get('/buyersList', verifyJWT, async (req, res) => {
+            const email = req.query.email
+            const filter = { sellerEmail: email }
+            const result = await bookingProductCollection.find(filter).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
 
         //# Category
         //* Add category api
