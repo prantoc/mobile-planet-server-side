@@ -44,6 +44,7 @@ async function run() {
         const usersCollection = DB.collection("user")
         const productsCollection = DB.collection("products")
         const bookingProductCollection = DB.collection("bookingProduct")
+        const wishlistCollection = DB.collection("wishlistProduct")
 
         //# JWT Access Token Create
         app.get('/jwt', async (req, res) => {
@@ -270,14 +271,32 @@ async function run() {
         //* Add to wishlist a product
         app.put('/wishlistProduct/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId(id) }
-            const bkdp = await bookingProductCollection.findOne(query); // bkdp = bookedProduct
+            const email = req.decoded.email
+            const query = { productId: id }
+            const bkdp = await wishlistCollection.findOne(query); // bkdp = bookedProduct
+            let data = { productId: id, wishlist: true, buyerEmail: email }
+            if (!bkdp) {
+                const result = await wishlistCollection.insertOne(data);
+                return res.send(result)
+            }
             const updateDoc = {
                 $set: {
                     wishlist: !bkdp.wishlist
                 },
             };
-            const result = await bookingProductCollection.updateOne(query, updateDoc);
+            const result = await wishlistCollection.updateOne(query, updateDoc);
+            res.send(result)
+        })
+
+        //* Get specific product wishlist status api 
+        app.get('/wishlistProduct', verifyJWT, async (req, res) => {
+            const id = req.query.id;
+            const email = req.decoded.email
+            const query = { productId: id, buyerEmail: email }
+            const result = await wishlistCollection.findOne(query);
+            if (!result) {
+                return res.send({ message: 'no data avaiable' })
+            }
             res.send(result)
         })
         //* Get wishlisted products api
@@ -295,11 +314,14 @@ async function run() {
             res.send(result)
         })
         //* Get specific booked product api
-        app.get('/bookedProduct', verifyJWT, async (req, res) => {
+        app.get('/bookedProduct', async (req, res) => {
             const email = req.query.email
             const id = req.query.id
             const filter = { buyerEmail: email, productId: id }
             const result = await bookingProductCollection.findOne(filter);
+            if (!result) {
+                return res.send({ message: 'no data avaiable' })
+            }
             res.send(result)
         })
 
