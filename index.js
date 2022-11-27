@@ -280,6 +280,13 @@ async function run() {
             const result = await bookingProductCollection.updateOne(query, updateDoc);
             res.send(result)
         })
+        //* Get wishlisted products api
+        app.get('/wishlistedProducts', verifyJWT, async (req, res) => {
+            const email = req.decoded.email
+            const filter = { buyerEmail: email, wishlist: true }
+            const result = await bookingProductCollection.find(filter).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
         //* Get booked products api
         app.get('/bookedProducts', verifyJWT, async (req, res) => {
             const email = req.query.email
