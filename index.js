@@ -261,13 +261,25 @@ async function run() {
         })
 
         //? Buyer  data frontned
-        //* book product api
+        //* book a product api
         app.post('/book-product', verifyJWT, async (req, res) => {
             const data = req.body
             const result = await bookingProductCollection.insertOne(data)
             res.send(result)
         })
-
+        //* Add to wishlist a product
+        app.put('/wishlistProduct/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const bkdp = await bookingProductCollection.findOne(query); // bkdp = bookedProduct
+            const updateDoc = {
+                $set: {
+                    wishlist: !bkdp.wishlist
+                },
+            };
+            const result = await bookingProductCollection.updateOne(query, updateDoc);
+            res.send(result)
+        })
         //* Get booked products api
         app.get('/bookedProducts', verifyJWT, async (req, res) => {
             const email = req.query.email
