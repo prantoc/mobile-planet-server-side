@@ -235,8 +235,6 @@ async function run() {
         //* Get products by category id api
         app.get('/category/:name', async (req, res) => {
             const categoryName = req.params.name
-            // const query = { _id: ObjectId(id) }
-            // const category = await categoryCollection.findOne(query);
             const filter = { productCategory: categoryName, displayListing: true }
             const result = await productsCollection.find(filter).sort({ _id: -1 }).toArray();
             res.send(result)
@@ -245,10 +243,14 @@ async function run() {
         //* Get single product details api
         app.get('/product-details/:id', async (req, res) => {
             const id = req.params.id
-            // const query = { _id: ObjectId(id) }
-            // const category = await categoryCollection.findOne(query);
             const filter = { _id: ObjectId(id), displayListing: true }
             const result = await productsCollection.findOne(filter);
+            res.send(result)
+        })
+
+        //* Show advertise product only
+        app.get('/advertiseProducts', async (req, res) => {
+            const result = await productsCollection.find({ advertise: true }).toArray()
             res.send(result)
         })
 
@@ -257,6 +259,22 @@ async function run() {
         app.post('/book-product', verifyJWT, async (req, res) => {
             const data = req.body
             const result = await bookingProductCollection.insertOne(data)
+            res.send(result)
+        })
+
+        //* Get booked products api
+        app.get('/bookedProducts', verifyJWT, async (req, res) => {
+            const email = req.query.email
+            const filter = { buyerEmail: email }
+            const result = await bookingProductCollection.find(filter).sort({ _id: -1 }).toArray();
+            res.send(result)
+        })
+        //* Get specific booked product api
+        app.get('/bookedProduct', verifyJWT, async (req, res) => {
+            const email = req.query.email
+            const id = req.query.id
+            const filter = { buyerEmail: email, productId: id }
+            const result = await bookingProductCollection.findOne(filter);
             res.send(result)
         })
 
