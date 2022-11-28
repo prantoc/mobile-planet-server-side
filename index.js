@@ -19,6 +19,9 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+//# This is your test secret API key.
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
+
 //# JWT Access Token verify
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -45,6 +48,7 @@ async function run() {
         const productsCollection = DB.collection("products")
         const bookingProductCollection = DB.collection("bookingProduct")
         const wishlistCollection = DB.collection("wishlistProduct")
+        const paymentCollection = DB.collection("payment")
 
         //# JWT Access Token Create
         app.get('/jwt', async (req, res) => {
@@ -327,6 +331,44 @@ async function run() {
             }
             res.send(result)
         })
+
+        //? Buyer payemnt Strip api
+        //* payment intent api 
+        app.post("/create-payment-intent", async (req, res) => {
+            const booking = req.body;
+            const price = booking.resellPrice
+            const amount = price * 100;
+
+            // Create a PaymentIntent with the order amount and currency
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                "payment_method_types": [
+                    "card"
+                ],
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
+
+        //# Store payment details
+        app.post('/payments', async (req, res) => {
+            const paymentData = req.body
+            const result = await paymentCollection.insertOne(paymentData)
+            const id = paymentData.productId
+            const query = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    paid: true
+                },
+            };
+            await bookingProductCollection.updateOne(query, updateDoc)
+            res.send(result)
+        })
+
+
 
     } finally {
     }
