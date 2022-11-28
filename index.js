@@ -313,6 +313,22 @@ async function run() {
             const wishlist = await wishlistCollection.find(filter).sort({ _id: -1 }).toArray();
             return res.send(wishlist)
         })
+        //* remove wishlist products api
+        app.get('/removeWishlistProduct/:id', verifyJWT, async (req, res) => {
+            const email = req.decoded.email
+            const id = req.params.id
+            console.log(id);
+            const filter = { buyerEmail: email, _id: ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    wishlist: false
+                },
+            };
+
+            const wishlist = await wishlistCollection.updateOne(filter, updateDoc);
+            return res.send(wishlist)
+        })
         //* Get booked products api
         app.get('/bookedProducts', verifyJWT, async (req, res) => {
             const email = req.query.email
@@ -361,6 +377,7 @@ async function run() {
             console.log(id);
             const query = { _id: ObjectId(id) }
             const filter = { _id: ObjectId(paymentData.productId) }
+            const queryWishlist = { productId: paymentData.productId }
             const updateDoc = {
                 $set: {
                     paid: true
@@ -373,7 +390,7 @@ async function run() {
             };
             await bookingProductCollection.updateOne(query, updateDoc)
             await productsCollection.updateOne(filter, upd)
-            await wishlistCollection.updateOne(filter, updateDoc)
+            await wishlistCollection.updateOne(queryWishlist, updateDoc)
             res.send(result)
         })
 
