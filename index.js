@@ -273,13 +273,13 @@ async function run() {
             res.send(result)
         })
         //* Add to wishlist a product
-        app.put('/wishlistProduct/', verifyJWT, async (req, res) => {
+        app.put('/addToWishlistProduct', verifyJWT, async (req, res) => {
             const id = req.query.id;
             const productName = req.query.name;
             const productImg = req.query.img;
             const productPrice = req.query.price;
             const email = req.decoded.email
-            const query = { productId: id }
+            const query = { productId: id, buyerEmail: { $eq: { email } } }
             const wlp = await wishlistCollection.findOne(query); // wlp = wishlistProduct
             let data = { productId: id, wishlist: true, buyerEmail: email, productName, productImg, productPrice, paid: false }
             if (!wlp) {
@@ -317,7 +317,6 @@ async function run() {
         app.get('/removeWishlistProduct/:id', verifyJWT, async (req, res) => {
             const email = req.decoded.email
             const id = req.params.id
-            console.log(id);
             const filter = { buyerEmail: email, _id: ObjectId(id) }
 
             const updateDoc = {
@@ -369,7 +368,7 @@ async function run() {
             });
         });
 
-        //# Store payment details
+        //* Store payment details api
         app.post('/payments', async (req, res) => {
             const paymentData = req.body
             const result = await paymentCollection.insertOne(paymentData)
@@ -393,7 +392,16 @@ async function run() {
             await wishlistCollection.updateOne(queryWishlist, updateDoc)
             res.send(result)
         })
-
+        //* Get specific product payment details api
+        app.get('/paymentProduct', verifyJWT, async (req, res) => {
+            const id = req.query.id
+            const filter = { productId: id }
+            const result = await paymentCollection.findOne(filter);
+            if (!result) {
+                return res.send({ message: 'no data avaiable' })
+            }
+            res.send(result)
+        })
 
 
     } finally {
