@@ -261,7 +261,7 @@ async function run() {
 
         //* Show advertise product only
         app.get('/advertiseProducts', async (req, res) => {
-            const result = await productsCollection.find({ advertise: true }).toArray()
+            const result = await productsCollection.find({ advertise: true, displayListing: true }).toArray()
             res.send(result)
         })
 
@@ -281,7 +281,7 @@ async function run() {
             const email = req.decoded.email
             const query = { productId: id }
             const wlp = await wishlistCollection.findOne(query); // wlp = wishlistProduct
-            let data = { productId: id, wishlist: true, buyerEmail: email, productName, productImg, productPrice }
+            let data = { productId: id, wishlist: true, buyerEmail: email, productName, productImg, productPrice, paid: false }
             if (!wlp) {
                 const result = await wishlistCollection.insertOne(data);
                 return res.send(result)
@@ -357,14 +357,23 @@ async function run() {
         app.post('/payments', async (req, res) => {
             const paymentData = req.body
             const result = await paymentCollection.insertOne(paymentData)
-            const id = paymentData.productId
+            const id = paymentData.id
+            console.log(id);
             const query = { _id: ObjectId(id) }
+            const filter = { _id: ObjectId(paymentData.productId) }
             const updateDoc = {
                 $set: {
                     paid: true
                 },
             };
+            const upd = {
+                $set: {
+                    displayListing: false
+                },
+            };
             await bookingProductCollection.updateOne(query, updateDoc)
+            await productsCollection.updateOne(filter, upd)
+            await wishlistCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
 
