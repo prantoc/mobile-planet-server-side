@@ -52,7 +52,7 @@ async function run() {
             const query = { email: email }
             const user = await usersCollection.findOne(query);
             if (user) {
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN);
                 return res.send({ accessToken: token })
             }
             res.status(403).send({ accessToken: '' })
@@ -269,19 +269,22 @@ async function run() {
             res.send(result)
         })
         //* Add to wishlist a product
-        app.put('/wishlistProduct/:id', verifyJWT, async (req, res) => {
-            const id = req.params.id;
+        app.put('/wishlistProduct/', verifyJWT, async (req, res) => {
+            const id = req.query.id;
+            const productName = req.query.name;
+            const productImg = req.query.img;
+            const productPrice = req.query.price;
             const email = req.decoded.email
             const query = { productId: id }
-            const bkdp = await wishlistCollection.findOne(query); // bkdp = bookedProduct
-            let data = { productId: id, wishlist: true, buyerEmail: email }
-            if (!bkdp) {
+            const wlp = await wishlistCollection.findOne(query); // wlp = wishlistProduct
+            let data = { productId: id, wishlist: true, buyerEmail: email, productName, productImg, productPrice }
+            if (!wlp) {
                 const result = await wishlistCollection.insertOne(data);
                 return res.send(result)
             }
             const updateDoc = {
                 $set: {
-                    wishlist: !bkdp.wishlist
+                    wishlist: !wlp.wishlist
                 },
             };
             const result = await wishlistCollection.updateOne(query, updateDoc);
@@ -303,8 +306,8 @@ async function run() {
         app.get('/wishlistedProducts', verifyJWT, async (req, res) => {
             const email = req.decoded.email
             const filter = { buyerEmail: email, wishlist: true }
-            const result = await bookingProductCollection.find(filter).sort({ _id: -1 }).toArray();
-            res.send(result)
+            const wishlist = await wishlistCollection.find(filter).sort({ _id: -1 }).toArray();
+            return res.send(wishlist)
         })
         //* Get booked products api
         app.get('/bookedProducts', verifyJWT, async (req, res) => {
