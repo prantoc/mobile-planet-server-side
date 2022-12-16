@@ -238,8 +238,14 @@ async function run() {
         //* User create api
         app.post('/users', async (req, res) => {
             const user = req.body
-            const result = await usersCollection.insertOne(user);
-            res.send(result)
+
+            const userEmail = await usersCollection.findOne({ email: user.email })
+            if (!userEmail) {
+                const result = await usersCollection.insertOne(user);
+                res.send(result)
+            }
+            // res.send('Already')
+
         })
 
         //? Product data frontned
