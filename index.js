@@ -249,6 +249,13 @@ async function run() {
         })
 
         //? Product data frontned
+
+        //* Show all products
+        app.get('/allproducts', async (req, res) => {
+            const result = await productsCollection.find({ displayListing: true }).toArray()
+            res.send(result)
+        })
+
         //* Get products by category id api
         app.get('/category/:name', async (req, res) => {
             const categoryName = req.params.name
