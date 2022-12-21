@@ -288,24 +288,30 @@ async function run() {
         //* Add to wishlist a product
         app.put('/addToWishlistProduct', verifyJWT, async (req, res) => {
             const id = req.query.id;
+            console.log(id);
             const productName = req.query.name;
             const productImg = req.query.img;
             const productPrice = req.query.price;
             const email = req.decoded.email
-            const query = { productId: id, buyerEmail: { $eq: { email } } }
+            const query = { productId: id, buyerEmail: email }
             const wlp = await wishlistCollection.findOne(query); // wlp = wishlistProduct
             let data = { productId: id, wishlist: true, buyerEmail: email, productName, productImg, productPrice, paid: false }
-            if (!wlp) {
-                const result = await wishlistCollection.insertOne(data);
+            if (wlp) {
+                const wl = wlp.wishlist
+                const updateDoc = {
+                    $set: {
+                        wishlist: !wl
+                    },
+                };
+                const result = await wishlistCollection.updateOne(query, updateDoc);
                 return res.send(result)
+            } else {
+                const result = await wishlistCollection.insertOne(data);
+                res.send(result)
             }
-            const updateDoc = {
-                $set: {
-                    wishlist: !wlp.wishlist
-                },
-            };
-            const result = await wishlistCollection.updateOne(query, updateDoc);
-            res.send(result)
+
+            // const result = await wishlistCollection.updateOne(query, updateDoc);
+
         })
 
         //* Get specific product wishlist status api 
